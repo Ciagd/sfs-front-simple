@@ -1,0 +1,67 @@
+<html>
+<head>
+    <script src="https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script>  
+        <script src="https://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+        <script type="text/javascript">
+            var App=(function(){
+                var login=function(){
+                    var formData = $('#form').serializeArray();
+                    var d={};
+                    if (formData && typeof formData == 'object') {
+                        $.each(formData, function(i, item) {
+                            if (item.name && item.value) {
+                                if (item.value != '') {
+                                    d[item.name] = item.value;
+                                }
+                            }
+                        });
+                    }
+
+                    $.ajax({
+                        url: 'http://localhost:8080/auth/login',
+                        type: "POST",
+                        dataType: "json",
+                        data: JSON.stringify(d),
+                        headers: createAuthorizationTokenHeader(),
+                        success: function(data, textStatus, jqXH){
+                            window.location.href="dashboard.html"
+                        }
+                    })
+                }
+
+                var createAuthorizationTokenHeader = function() {
+                    var token = getJwtToken();
+                    if (token) {
+                        return {
+                            "Authorization": "Bearer " + token,
+                            'Content-Type': 'application/json'
+                        };
+                    } else {
+                        return {
+                            'Content-Type': 'application/json'
+                        };
+                    }
+                }
+
+                var getJwtToken=function(){
+                    return $.cookie("jwtToken")
+                }
+
+                var setJwtToken=function(token){
+                    $.cookie("jwtToken", token)
+                }
+
+                return {
+                    login:login,
+                }
+            })()
+        </script> 
+</head>
+    <body>
+        <form id="form" onsubmit="return false;">
+            <input name="username" type="text"/>
+            <input name="password" type="text"/>
+            <button type="button" class="btn btn-primary" onclick="App.login()">Submit</button>
+        </form>          
+    </body>    
+</html>    
